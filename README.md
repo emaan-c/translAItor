@@ -116,3 +116,19 @@ flowchart TD
     frontend4 ==> frontend5
     frontend5 ==> user
 ```
+
+**User Interaction**
+- User (WebCam): Initiates the flow by providing video input through the webcam.
+
+**Frontend Processes (React.js)**
+- Collect Video Frames (Real-Time): Captures video frames in real-time from the user's webcam.
+- Send Video Frames (Real-Time): Sends the collected video frames to the backend, likely using a WebSocket for real-time communication.
+- Retrieve Translation from Server: Receives the processed translation from the backend.
+- Display Text Translation: Shows the translated text to the user on the frontend interface.
+- Output Speech: Converts the text translation into speech output for the user, probably using a text-to-speech API.
+
+**Backend Processes (FastAPI)**
+- Receive Video Frames (POST: SendFrame(userId, Device, Offset)): Gets video frame data from the frontend along with any additional data like userId, device information, and offset.
+- Process Video Frames: Analyzes the video frames to recognize sign language gestures.
+- Generate Textual Translation: Translates recognized gestures into corresponding text.
+- Send Translation to Client: Sends the text translation back to the frontend for display and speech synthesis.
