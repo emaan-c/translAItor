@@ -46,3 +46,73 @@ The translAItor app is an innovative web-based platform designed to bridge commu
     - (Optional) A database to log user sessions, store historical data, or manage user accounts, if needed.
 - Security Measures:
     - (Optional) Implementations to ensure data privacy and security, including secure data transmission and storage, and compliance with relevant regulations.
+
+## Systems Design
+
+```mermaid
+flowchart LR
+    userA("User A")
+    userB("User B")
+    userC("User C")
+    userD("User D")
+    frontend["`Frontend (_**React.js**_)`"]
+    userA ==> frontend
+    userB ==> frontend
+    userC ==> frontend
+    userD ==> frontend
+
+    backend["`Backend (_**FastAPI**_)`"]
+    frontend ==>|"POST: SendFrame(userId, Device, Offset)"| backend
+    backend ==>|"GET: getTrans()"| frontend
+
+    database[("`Database (_**Google Cloud SQL**_)`")]
+    backend ==> database
+    database ==> backend
+```
+
+- **Users (A, B, C, D)**
+  - Represents different clients accessing the system, possibly with unique requirements and contexts.
+
+- **Frontend (React.js)**
+  - The user interface where interactions take place. Handles video stream input from users' webcams.
+  - Sends video frames to the backend server via API calls (WebSockets/Long Pollling) and receives text translation data from server
+- **Backend (FastAPI)**
+  - The server-side logic that processes API requests.
+  - Handles the core functionality including sign language processing and interaction with the database. Strictly handles the process in which it recieves video frames from client, interprets video frames, produces textual translation and sends client result
+
+- **Database (Google Cloud SQL)**
+  - Stores user data, translation logs, settings, and other persistent information.
+  - Accessed by the backend to retrieve or store data as required by the application logic.
+
+
+## Data Flow Diagram
+
+```mermaid
+flowchart TD
+    user("User (WebCam)")
+    frontend["`Frontend (_**React.js**_)`" ]
+    frontend1{{"Collect Video Frames (Real-Time)"}}
+    frontend2{{"Send Video Frames (Real-Time)"}}
+    frontend3{{"Retrieve Translation from Server"}}
+    frontend4{{"Display Text Translation"}}
+    frontend5{{"Output Speech"}}
+    backend["`Backend (_**FastAPI**_)`"]
+    backend1{{"Get Video Frames from Client"}}
+    backend2{{"Process Video Frames"}}
+    backend3{{"Generate Textual Translation"}}
+    backend4{{"Send Translation to Client"}}
+
+    user ==> frontend
+    frontend ==>|"Frontend Processes"| frontend1
+    frontend1 ==> frontend2
+    frontend2 ==>|"POST: SendFrame(userId, Device, Offset)"| backend
+    backend ==>|"Backend Processes"| backend1
+    backend1 ==> backend2
+    backend2 ==> backend3
+    backend3 ==> backend4
+    backend4 ==> frontend
+    frontend ==>|"Frontend Processes"| frontend3
+    frontend3 ==> frontend4
+    frontend4 ==> frontend5
+    frontend5 ==> user
+```
