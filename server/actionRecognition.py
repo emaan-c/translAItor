@@ -39,35 +39,6 @@ def draw_landmarks(image, results):
                               mp_drawing.DrawingSpec(color=(245,117,66), thickness=2, circle_radius=4),
                               mp_drawing.DrawingSpec(color=(245,66,230), thickness=2, circle_radius=2)) # Draw right hand connections
 
-# This is for the OpenCV Camera
-
-# cap = cv2.VideoCapture(0)
-
-# # Set mediapipe model
-# with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
-#     while cap.isOpened():
-
-#         # Read feed
-#         ret, frame = cap.read()
-
-#         # Make detections
-#         image, results = mediapipe_detection(frame, holistic)
-
-#         # Draw landmarks
-
-#         draw_landmarks(image, results)
-
-#         # Show to screen
-#         cv2.imshow('OpenCV Feed', image)
-
-#         # Break gracefully
-#         if cv2.waitKey(10) & 0xFF == ord('q'):
-#             break
-#     cap.release()
-#     cv2.destroyAllWindows()
-
-## Extract Keypoint Values
-
 def extract_keypoints(results):
     face = np.array([[res.x, res.y, res.z] for res in results.face_landmarks.landmark]).flatten() if results.face_landmarks else np.zeros(468*3)
     pose = np.array([[res.x, res.y, res.z, res.visibility] for res in results.pose_landmarks.landmark]).flatten() if results.pose_landmarks else np.zeros(33*4)
@@ -88,62 +59,6 @@ no_sequences = 30
 
 # Videos are going to be 30 frames in length
 sequence_length = 30
-
-# for action in actions:
-#     for sequence in range(no_sequences):
-#         try:
-#             os.makedirs(os.path.join(DATA_PATH, action, str(sequence)))
-#         except:
-#             pass
-
-## Collect Keypoint Values for Training and Testing
-
-# cap = cv2.VideoCapture(0)
-
-# # Set mediapipe model
-# with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
-#     # Loop through actions
-#     for action in actions:
-#         # Loop through sequences aka videos
-#         for sequence in range(no_sequences):
-#             # Loop through video length aka sequence length
-#             for frame_num in range(sequence_length):
-
-#                 # Read feed
-#                 ret, frame = cap.read()
-
-#                 # Make detections
-#                 image, results = mediapipe_detection(frame, holistic)
-
-#                 # Draw landmarks
-
-#                 draw_landmarks(image, results)
-
-#                 # Apply wait logic
-#                 if frame_num == 0: # If were at frame 0
-#                     cv2.putText(image, 'STARTING COLLECTION', (120,200),
-#                                 cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,0), 4, cv2.LINE_AA)
-#                     cv2.putText(image, 'Collecting frames for {} Video Number {}'.format(action, sequence), (15,12),
-#                                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 1, cv2.LINE_AA)
-#                     cv2.waitKey(2000)
-#                 else:
-#                     cv2.putText(image, 'Collecting frames for {} Video Number {}'.format(action, sequence), (15,12),
-#                                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 1, cv2.LINE_AA)
-
-#                 keypoints = extract_keypoints(results)
-#                 npy_path = os.path.join(DATA_PATH, action, str(sequence), str(frame_num))
-#                 np.save(npy_path, keypoints)
-
-#                 # Show to screen
-#                 cv2.imshow('OpenCV Feed', image)
-
-#                 # Break gracefully
-#                 if cv2.waitKey(10) & 0xFF == ord('q'):
-#                     break
-#     cap.release()
-#     cv2.destroyAllWindows()
-
-## Preprocess Data and Create Labels and Features
 
 label_map = {label: num for num, label in enumerate(actions)}
 
@@ -195,125 +110,71 @@ def prob_viz(res, actions, input_frame, colors):
         
     return output_frame
 
-sequence = []
-sentence = []
-predictions = []
-threshold = 0.5
-# retrieve file from /videos/video.webm
-cap = cv2.VideoCapture('videos/video.webm')
-# cap = cv2.VideoCapture()
-# Set mediapipe model 
 
-with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
-    while cap.isOpened():
+def actionRecognition():
+    sequence = []
+    sentence = []
+    predictions = []
+    threshold = 0.5
+    # retrieve file from /videos/video.webm
+    cap = cv2.VideoCapture('videos/video.webm')
+    # cap = cv2.VideoCapture()
+    # Set mediapipe model 
 
-        # Read feed
-        ret, frame = cap.read()
+    with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
+        while cap.isOpened():
 
-        if frame is None or not frame.any():
-            break
+            # Read feed
+            ret, frame = cap.read()
 
-        # Make detections
-        image, results = mediapipe_detection(frame, holistic)
-        #print(results)
-        
-        # Draw landmarks
-        draw_landmarks(image, results)
-        
-        # 2. Prediction logic
-        keypoints = extract_keypoints(results)
-        sequence.append(keypoints)
-        sequence = sequence[-30:]
-        
-        if len(sequence) == 30:
-            res = model.predict(np.expand_dims(sequence, axis=0))[0]
-            #print(actions[np.argmax(res)])
-            predictions.append(np.argmax(res))
+            if frame is None or not frame.any():
+                break
+
+            # Make detections
+            image, results = mediapipe_detection(frame, holistic)
+            #print(results)
             
+            # Draw landmarks
+            draw_landmarks(image, results)
             
-        #3. Viz logic
-            if np.unique(predictions[-10:])[0]==np.argmax(res): 
-                if res[np.argmax(res)] > threshold: 
-                    
-                    if len(sentence) > 0: 
-                        if actions[np.argmax(res)] != sentence[-1]:
+            # 2. Prediction logic
+            keypoints = extract_keypoints(results)
+            sequence.append(keypoints)
+            sequence = sequence[-30:]
+            
+            if len(sequence) == 30:
+                res = model.predict(np.expand_dims(sequence, axis=0))[0]
+                #print(actions[np.argmax(res)])
+                predictions.append(np.argmax(res))
+                
+                
+            #3. Viz logic
+                if np.unique(predictions[-10:])[0]==np.argmax(res): 
+                    if res[np.argmax(res)] > threshold: 
+                        
+                        if len(sentence) > 0: 
+                            if actions[np.argmax(res)] != sentence[-1]:
+                                sentence.append(actions[np.argmax(res)])
+                        else:
                             sentence.append(actions[np.argmax(res)])
-                    else:
-                        sentence.append(actions[np.argmax(res)])
 
-            if len(sentence) > 5: 
-                sentence = sentence[-5:]
+                if len(sentence) > 5: 
+                    sentence = sentence[-5:]
 
-            # Viz probabilities
-            image = prob_viz(res, actions, image, colors)
-        
-        cv2.rectangle(image, (0,0), (640, 40), (245, 117, 16), -1)
-        cv2.putText(image, ' '.join(sentence), (3,30), 
-                       cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
-        # print(sentence)
-        # Show to screen
-        # cv2.imshow('OpenCV Feed', image)
-
-        # Break gracefully
-        # if cv2.waitKey(10) & 0xFF == ord('q'):
-        #    break
-    cap.release()
-    cv2.destroyAllWindows()
-
-print(sentence)
-
-# cap = cv2.VideoCapture('videos/video.webm')
-# # cap = cv2.VideoCapture()
-# # Set mediapipe model 
-# with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
-#     while cap.isOpened():
-
-#         # Read feed
-#         ret, frame = cap.read()
-
-#         # Make detections
-#         image, results = mediapipe_detection(frame, holistic)
-#         print(results)
-        
-#         # Draw landmarks
-#         draw_landmarks(image, results)
-        
-#         # 2. Prediction logic
-#         keypoints = extract_keypoints(results)
-#         sequence.append(keypoints)
-#         sequence = sequence[-30:]
-        
-#         if len(sequence) == 30:
-#             res = model.predict(np.expand_dims(sequence, axis=0))[0]
-#             print(actions[np.argmax(res)])
-#             predictions.append(np.argmax(res))
+                # Viz probabilities
+                image = prob_viz(res, actions, image, colors)
             
-            
-#         #3. Viz logic
-#             if np.unique(predictions[-10:])[0]==np.argmax(res): 
-#                 if res[np.argmax(res)] > threshold: 
-                    
-#                     if len(sentence) > 0: 
-#                         if actions[np.argmax(res)] != sentence[-1]:
-#                             sentence.append(actions[np.argmax(res)])
-#                     else:
-#                         sentence.append(actions[np.argmax(res)])
+            cv2.rectangle(image, (0,0), (640, 40), (245, 117, 16), -1)
+            cv2.putText(image, ' '.join(sentence), (3,30), 
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
+        cap.release()
+        cv2.destroyAllWindows()
 
-#             if len(sentence) > 5: 
-#                 sentence = sentence[-5:]
-
-#             # Viz probabilities
-#             image = prob_viz(res, actions, image, colors)
-            
-#         cv2.rectangle(image, (0,0), (640, 40), (245, 117, 16), -1)
-#         cv2.putText(image, ' '.join(sentence), (3,30), 
-#                        cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
-        
-#         # Show to screen
-#         cv2.imshow('OpenCV Feed', image)
-
-#         # Break gracefully
-#         if cv2.waitKey(10) & 0xFF == ord('q'):
-#             break
-#     cap.release()
-#     cv2.destroyAllWindows()
+    for i in range(len(sentence)):
+        if sentence[i] == 'iloveyou':
+            sentence[i] = 'I Love You'
+        elif sentence[i] == 'thanks':
+            sentence[i] = 'Thank You'
+        else:
+            sentence[i] = 'Hello'
+    return sentence

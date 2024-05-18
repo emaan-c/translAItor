@@ -1,2 +1,5 @@
-async def temporary(file):
-    # send file to actionRecognition.py and get the translation of the result from ``
+from actionRecognition import actionRecognition
+
+def translation():
+    # Leaving this function empty for future implementation
+    return actionRecognition()
