@@ -1,5 +1,5 @@
 import WebcamComponent from './WebcamComponent';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LaptopOutlined, NotificationOutlined, UserOutlined } from '@ant-design/icons';
 import { Breadcrumb, Layout, Menu, theme } from 'antd';
 import { Typography } from 'antd';
@@ -35,6 +35,13 @@ const App = () => {
     setTranslation(response);
   };
 
+  useEffect(() => {
+    if (translation.length > 0) {
+      const utterance = new SpeechSynthesisUtterance(translation.join(' '));
+      speechSynthesis.speak(utterance);
+    }
+  }, [translation]);
+
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
@@ -47,7 +54,7 @@ const App = () => {
           alignItems: 'center'
         }}
       >
-        <Title style={{width:'15%', marginTop: '1%', color: 'white'}}>Transl-AI-tor</Title>
+        <Title style={{width:'25%', marginTop: '1%', color: 'white'}}>Transl-AI-tor</Title>
         <Menu
           theme="dark"
           mode="horizontal"
@@ -55,7 +62,7 @@ const App = () => {
           items={items1}
           style={{
             flex: 1,
-            minWidth: 0,
+            minWidth: 0
           }}
         />
       </Header>

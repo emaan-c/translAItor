@@ -22,9 +22,4 @@ async def create_upload_file(file: UploadFile = File(...)):
         f.write(await file.read())
 
     videoTranslated = translation()
-    print(JSONResponse(status_code=200, content={"result": videoTranslated}))
     return JSONResponse(status_code=200, content={"result": videoTranslated})
-
-## display server result in frontend
-## Make server process efficient
-## incorperate live video feed

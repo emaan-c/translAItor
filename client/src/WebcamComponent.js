@@ -92,35 +92,9 @@ const WebcamComponent = ({ handleResponse }) => {
     <>
       <Row>
         <Col flex="auto">
-          <Webcam audio={false} mirrored={false} ref={webcamRef} width="93%" style={{marginLeft: '25px'}}/>
+          <Webcam audio={false} mirrored={true} ref={webcamRef} width="93%" style={{marginLeft: '25px'}}/>
         </Col>
         <Col flex="300px" >
-        <Typography>
-          <Title>Why Translate?</Title>
-
-          <Paragraph>
-            In the process of internal desktop applications development, many different design specs and
-            implementations would be involved, which might cause designers and developers difficulties and
-            duplication and reduce the efficiency of development.
-          </Paragraph>
-
-          <Paragraph>
-            After massive project practice and summaries, Ant Design, a design language for background
-            applications, is refined by Ant UED Team, which aims to{' '}
-            <Text strong>
-              uniform the user interface specs for internal background projects, lower the unnecessary
-              cost of design differences and implementation and liberate the resources of design and
-              front-end development
-            </Text>
-            .
-          </Paragraph>
-
-          <Paragraph>
-            In the process of internal desktop applications development, many different design specs and
-            implementations would be involved, which might cause designers and developers difficulties and
-            duplication and reduce the efficiency of development.
-          </Paragraph>
-        </Typography>
           {capturing ? (
             <ConfigProvider
               theme={{
@@ -134,7 +108,7 @@ const WebcamComponent = ({ handleResponse }) => {
                 },
               }}
             >
-              <Button type="primary" size="large" onClick={handleStopCaptureClick} style={{width: '300px', marginTop: '20px'}}>
+              <Button type="primary" size="large" onClick={handleStopCaptureClick} style={{width: '300px', marginTop: '20px', marginLeft: '22px'}}>
                 Finish Translation
               </Button>
             </ConfigProvider>
@@ -151,7 +125,7 @@ const WebcamComponent = ({ handleResponse }) => {
                 },
               }}
             >
-              <Button type="primary" size="large" onClick={handleStartCaptureClick} style={{width: '300px', marginTop: '20px'}}>
+              <Button type="primary" size="large" onClick={handleStartCaptureClick} style={{width: '300px', marginTop: '20px', marginLeft: '22px'}}>
                 Start Translation
               </Button>
             </ConfigProvider>
